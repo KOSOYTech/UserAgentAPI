@@ -1,45 +1,60 @@
 <?php
-require_once __DIR__.'/../vendor/autoload.php';
 
-use DeviceDetector\DeviceDetector;
-use DeviceDetector\Parser\Device\DeviceParserAbstract;
+/**
+ * Laravel - A PHP Framework For Web Artisans
+ *
+ * @package  Laravel
+ * @author   Taylor Otwell <taylor@laravel.com>
+ */
 
-// OPTIONAL: Set version truncation to none, so full versions will be returned
-// By default only minor versions will be returned (e.g. X.Y)
-// for other options see VERSION_TRUNCATION_* constants in DeviceParserAbstract class
-DeviceParserAbstract::setVersionTruncation(DeviceParserAbstract::VERSION_TRUNCATION_NONE);
+define('LARAVEL_START', microtime(true));
 
-$userAgent = $_SERVER['HTTP_USER_AGENT']; // change this to the useragent you want to parse
+/*
+|--------------------------------------------------------------------------
+| Register The Auto Loader
+|--------------------------------------------------------------------------
+|
+| Composer provides a convenient, automatically generated class loader for
+| our application. We just need to utilize it! We'll simply require it
+| into the script here so that we don't have to worry about manual
+| loading any of our classes later on. It feels great to relax.
+|
+*/
 
-$dd = new DeviceDetector($userAgent);
+require __DIR__.'/../vendor/autoload.php';
 
-// OPTIONAL: Set caching method
-// By default static cache is used, which works best within one php process (memory array caching)
-// To cache across requests use caching in files or memcache
-// $dd->setCache(new Doctrine\Common\Cache\PhpFileCache('./tmp/'));
+/*
+|--------------------------------------------------------------------------
+| Turn On The Lights
+|--------------------------------------------------------------------------
+|
+| We need to illuminate PHP development, so let us turn on the lights.
+| This bootstraps the framework and gets it ready for use, then it
+| will load up this application so that we can run it and send
+| the responses back to the browser and delight our users.
+|
+*/
 
-// OPTIONAL: Set custom yaml parser
-// By default Spyc will be used for parsing yaml files. You can also use another yaml parser.
-// You may need to implement the Yaml Parser facade if you want to use another parser than Spyc or [Symfony](https://github.com/symfony/yaml)
-// $dd->setYamlParser(new DeviceDetector\Yaml\Symfony());
+$app = require_once __DIR__.'/../bootstrap/app.php';
 
-// OPTIONAL: If called, getBot() will only return true if a bot was detected  (speeds up detection a bit)
-// $dd->discardBotInformation();
+/*
+|--------------------------------------------------------------------------
+| Run The Application
+|--------------------------------------------------------------------------
+|
+| Once we have the application, we can handle the incoming request
+| through the kernel, and send the associated response back to
+| the client's browser allowing them to enjoy the creative
+| and wonderful application we have prepared for them.
+|
+*/
 
-// OPTIONAL: If called, bot detection will completely be skipped (bots will be detected as regular devices then)
-// $dd->skipBotDetection();
+$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 
-$dd->parse();
+$response = $kernel->handle(
+    $request = Illuminate\Http\Request::capture()
+);
 
-if ($dd->isBot()) {
-  // handle bots,spiders,crawlers,...
-  $botInfo = $dd->getBot();
-} else {
-  $clientInfo = $dd->getClient(); // holds information about browser, feed reader, media player, ...
-  $osInfo = $dd->getOs();
-  $device = $dd->getDeviceName();
-  $brand = $dd->getBrandName();
-  $model = $dd->getModel();
-  print_r($osInfo);
-}
-?>
+$response->send();
+
+$kernel->terminate($request, $response);
