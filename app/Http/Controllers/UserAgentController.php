@@ -28,17 +28,14 @@ class UserAgentController extends Controller
         $dd = new DeviceDetector($UserAgent);
         $dd->parse();
 
-        if ($dd->parse()) {
-            echo "Success";
-        }
-
         // Заранее указываем, что в ответ мы возвращаем данные формате JSON
         header('Content-Type: application/json');
         
-        // Проверяем, является ли переданный UserAgent ботом
+        // Проверяем, является ли переданное значение ботом, клиентским UserAgent или чем-то другим
+        // Проверяем, является ли переданное значение ботом
         if ($dd->isBot()) {
 
-            // Сохраняем массив с информацией о боте
+            // Получаем массив с информацией о боте
             $botInfo = $dd->getBot();
 
             // Преобразуем сохраненный массив с информацией о боте в формат JSON
@@ -50,26 +47,50 @@ class UserAgentController extends Controller
             // Записываем данные о боте в БД в таблицу с ботами
             function realBot($botInfo) {
                 $bot = new Bot;
-                $bot->name = $botInfo["name"];
-                $bot->category = $botInfo["category"];
-                $bot->url = $botInfo["url"];
-                $bot->producer_name = $botInfo["producer"]["name"];
-                $bot->producer_url = $botInfo["producer"]["url"];
-                $bot->save();
+
+                // Если это универсальный бот (Generic Bot), у которого есть только значение NAME,
+                // то сохраняем только поле NAME, а все остальные значения передаём пустыми.
+                // В ином случае, сохраняем данные о боте полностью
+                if ($botInfo["name"] == 'Generic Bot') {
+                    $bot->name = $botInfo["name"];
+                    $bot->category = "";
+                    $bot->url = "";
+                    $bot->producer_name = "";
+                    $bot->producer_url = "";
+                    $bot->save();
+                } else {
+                    $bot->name = $botInfo["name"];
+                    $bot->category = $botInfo["category"];
+                    $bot->url = $botInfo["url"];
+                    $bot->producer_name = $botInfo["producer"]["name"];
+                    $bot->producer_url = $botInfo["producer"]["url"];
+                    $bot->save();
+                }
             }
             realBot($botInfo);
 
-        } else {
+        // Проверяем, является ли переданное значение клиентским UserAgent
+        } else if ($dd->getClient()) {
+
+            // Получаем информацию о клиентском UserAgent
             $clientInfo = $dd->getClient(); 
             $osInfo = $dd->getOs();
             $device = $dd->getDeviceName();
             $brand = $dd->getBrandName();
             $model = $dd->getModel();
+
+            // Объединяем в один массив массив с информацией о клиенте и массив с информацией об ОС
             $resultInfo = array_merge($clientInfo, $osInfo);
+
+            // Добавляем в объединенный массив строки, содержащие информацию об устройстве, бренде и модели
             $resultInfo += ['device'=>$device];
             $resultInfo += ['brand'=>$brand];
             $resultInfo += ['model'=>$model];
+
+            // Преобразуем полученный массив с информацией о клиентском UserAgent в формат JSON
             $jsonCI = json_encode($resultInfo);
+
+            // Возвращаем информацию о клиентском UserAgent в формате JSON
             echo $jsonCI;
 
             // Записываем данные о клиентском UserAgent в БД в таблицу клиентскими UserAgent
@@ -89,6 +110,10 @@ class UserAgentController extends Controller
             }
             addClient($resultInfo);
 
+        // Если полученные Get-параметры - это не бот и не клиентский UserAgent,
+        // то, соответственно, говорим, что в переданных Get-параметрах мы не обнаружили UserAgent
+        } else {
+            echo "Sorry, there is no UserAgent in your request";
         }
 
     }
