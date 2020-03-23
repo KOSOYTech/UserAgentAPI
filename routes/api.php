@@ -14,20 +14,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Route::middleware('auth:api')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
-
-// Route::prefix('/useragentapi')->group(function (){
-//     //Route::get('/', ['uses' => 'UserAgentController@getUserAgent']);
-//     Route::get('/{UserAgent}', ['uses' => 'UserAgentController@detail']);
-// });
-
-//Route::get('/{UserAgent}', ['uses' => 'UserAgentController@detail']);
-Route::get('user', 'UserAgentController@detail');
-
-
-// Route::get('/task', function (Request $request) {
-//      echo "111";
-//    });
+Route::middleware('auth:api')->get('/user', function (Request $request) {
+    return $request->user();
+});
 

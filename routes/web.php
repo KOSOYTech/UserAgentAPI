@@ -17,16 +17,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Auth::routes();
-
-Route::get('/home', 'HomeController@index')->name('home');
-
-// Route::get('users', function () {
-//     return view('useragentapi');
-// });
-
-// Route::get('ua/{UserAgent}', ['uses' => 'UserAgentController@another']);
-
 Route::get('api', ['uses' => 'UserAgentController@detail']);
 
 
