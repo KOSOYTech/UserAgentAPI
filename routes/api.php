@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\Route;
 // });
 
 //Route::get('/{UserAgent}', ['uses' => 'UserAgentController@detail']);
-//Route::get('user', 'UserAgentController@show');
+Route::get('user', 'UserAgentController@detail');
 
 
 // Route::get('/task', function (Request $request) {

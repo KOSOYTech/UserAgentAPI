@@ -25,8 +25,8 @@ Route::get('/home', 'HomeController@index')->name('home');
 //     return view('useragentapi');
 // });
 
-Route::get('ua/{UserAgent}', ['uses' => 'UserAgentController@another']);
+// Route::get('ua/{UserAgent}', ['uses' => 'UserAgentController@another']);
 
-Route::get('uaa', ['uses' => 'UserAgentController@noparam']);
+Route::get('api', ['uses' => 'UserAgentController@detail']);
 
 
